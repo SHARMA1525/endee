@@ -21,10 +21,15 @@ CONFIG_PATH="$HOME/Library/Application Support/ngrok/ngrok.yml"
 if [ -f "$CONFIG_PATH" ]; then
     echo "Checking for ngrok configuration at $CONFIG_PATH..."
     
-    # Create a temporary config for both services with the required version property
-    # We use the system config's authtoken automatically if we don't specify it,
-    # but to be safe and explicit with multiple tunnels, we pull it.
-    AUTH_TOKEN=$(grep "authtoken:" "$CONFIG_PATH" | head -n 1 | cut -d ' ' -f 2)
+    # Extract authtoken more robustly using sed (handles quotes and spaces)
+    AUTH_TOKEN=$(grep "authtoken:" "$CONFIG_PATH" | head -n 1 | sed -e 's/authtoken: //' -e 's/"//g' -e "s/'//g" | xargs)
+
+    if [ -z "$AUTH_TOKEN" ]; then
+        echo "⚠️  Warning: Could not extract authtoken from $CONFIG_PATH."
+        echo "Starting in single tunnel mode (requires manual second tunnel for Ollama)."
+        ngrok http 8080
+        exit 0
+    fi
 
     cat <<EOF > docbot_ngrok.yml
 version: "2"
