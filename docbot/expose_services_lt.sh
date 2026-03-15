@@ -15,6 +15,10 @@ then
     exit 1
 fi
 
+echo "⚠️  CRITICAL: You MUST restart Ollama with external access enabled BEFORE running this."
+echo "   Run this in a NEW terminal first:"
+echo "   OLLAMA_ORIGINS=\"*\" OLLAMA_HOST=\"0.0.0.0\" ollama serve"
+echo ""
 echo "🚀 Starting tunnels for Endee (8080) and Ollama (11434)..."
 echo "Please wait a moment for the URLs to appear."
 echo "Press Ctrl+C to stop."
