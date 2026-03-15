@@ -5,7 +5,7 @@ import urllib.parse
 import os
 
 # Configuration
-PORT = 5000
+PORT = 5005
 ENDEE_HOST = "127.0.0.1"
 ENDEE_PORT = 8080
 OLLAMA_HOST = "127.0.0.1"

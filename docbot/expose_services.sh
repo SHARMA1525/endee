@@ -12,7 +12,7 @@ then
 fi
 
 # 1. Start the Unified Proxy in the background
-echo "🚀 Starting Unified Proxy on port 5000..."
+echo "🚀 Starting Unified Proxy on port 5005..."
 python3 docbot/tunnel_proxy.py &
 PROXY_PID=$!
 
@@ -29,7 +29,7 @@ trap cleanup SIGINT
 sleep 2
 
 # 2. Start a SINGLE ngrok tunnel to the proxy
-echo "🚀 Starting ngrok tunnel to port 5000..."
+echo "🚀 Starting ngrok tunnel to port 5005..."
 echo "----------------------------------------------------"
 echo "📍 INSTRUCTIONS:"
 echo "1. Wait for ngrok to show the 'Forwarding' URL (e.g., https://xyz.ngrok-free.dev)"
@@ -40,4 +40,4 @@ echo "----------------------------------------------------"
 echo "Press Ctrl+C to stop."
 echo ""
 
-ngrok http 5000
+ngrok http 5005
