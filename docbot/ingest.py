@@ -60,7 +60,7 @@ def index_documents(chunks: List[str]):
         headers["Authorization"] = ENDEE_AUTH_TOKEN
 
     # Batch inserts for better performance and reliability
-    batch_size = 100
+    batch_size = 256
     for i in range(0, len(vectors), batch_size):
         batch = vectors[i : i + batch_size]
         try:

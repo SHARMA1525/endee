@@ -10,18 +10,20 @@ ENDEE_URL = os.getenv("ENDEE_URL", "http://localhost:8080")
 ENDEE_AUTH_TOKEN = os.getenv("ENDEE_AUTH_TOKEN", "")
 INDEX_NAME = "docbot_index"
 
+_ollama_client = None
+
 def get_ollama_client():
-    host = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
-    # Add multiple headers for ngrok and localtunnel public access bypass
-    headers = {
-        "ngrok-skip-browser-warning": "true",
-        "Bypass-Tunnel-Reminder": "true",
-        "bypass-tunnel-reminder": "true",
-        "User-Agent": "Bypassing-Localtunnel-Reminder"
-    }
-    # Ensure no trailing slash for the client host
-    host = host.rstrip('/')
-    return ollama.Client(host=host, headers=headers)
+    global _ollama_client
+    if _ollama_client is None:
+        host = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
+        headers = {
+            "ngrok-skip-browser-warning": "true",
+            "Bypass-Tunnel-Reminder": "true",
+            "bypass-tunnel-reminder": "true",
+            "User-Agent": "Bypassing-Localtunnel-Reminder"
+        }
+        _ollama_client = ollama.Client(host=host.rstrip('/'), headers=headers)
+    return _ollama_client
 
 def search_top_k(query: str, k: int = 3) -> List[dict]:
     vector = get_embeddings(query)
@@ -80,17 +82,8 @@ def search_top_k(query: str, k: int = 3) -> List[dict]:
         return {"error": f"Search error: {e}"}
 
 def generate_answer(question: str, context: str, stream: bool = False):
-    prompt = f"""
-    Use the following Context to answer the Question. If the context is empty, answer based on your general knowledge but mention that no specific documents were found.
-
-    Context:
-    {context}
-
-    Question:
-    {question}
-
-    Answer:
-    """
+    # Concise prompt for faster generation
+    prompt = f"Context:\n{context}\n\nQuestion: {question}\n\nAnswer:"
 
     try:
         model = os.getenv("OLLAMA_MODEL", "llama3:latest")

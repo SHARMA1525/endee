@@ -82,7 +82,8 @@ class UnifiedProxyHandler(http.server.BaseHTTPRequestHandler):
             print(f"ERROR: Proxy failed to connect to {service_name}: {e}")
             self.send_response(502)
             self.end_headers()
-            self.wfile.write(f"Proxy error connecting to {service_name}: {e}".encode())
+            err_msg = f"DocBot Proxy Error: Could not connect to {service_name}. Is it running on {target_host}:{target_port}? Error: {e}"
+            self.wfile.write(err_msg.encode())
 
 if __name__ == "__main__":
     print(f"🚀 Unified Proxy listening on port {PORT}")
