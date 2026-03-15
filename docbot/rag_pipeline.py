@@ -67,8 +67,7 @@ def search_top_k(query: str, k: int = 3) -> List[dict]:
                     })
             return formatted_results
         else:
-            print(f"Search failed with status {response.status_code}: {response.text}")
-            return []
+            return {"error": f"Search failed (Status {response.status_code}): {response.text}"}
     except requests.exceptions.ConnectionError:
         return {"error": "Could not connect to Endee server. Please check your Endee URL/Tunnel."}
     except Exception as e:
