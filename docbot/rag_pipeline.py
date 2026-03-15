@@ -88,7 +88,8 @@ def generate_answer(question: str, context: str) -> str:
         return response["message"]["content"]
     except Exception as e:
         model = os.getenv("OLLAMA_MODEL", "llama3:latest")
-        return f"Error connecting to Ollama: {e}. Ensure Ollama is running and has model '{model}' installed."
+        host = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
+        return f"Error connecting to Ollama: {e}. [Host: {host}] [Model: {model}]. Please ensure Ollama is running and the model is pulled."
 
 def rag_query(query: str) -> dict:
     results = search_top_k(query)

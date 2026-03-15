@@ -60,7 +60,7 @@ with st.sidebar:
     if "ollama_model" not in st.session_state:
         st.session_state.ollama_model = os.getenv("OLLAMA_MODEL", "llama3:latest")
     if "ollama_host" not in st.session_state:
-        st.session_state.ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+        st.session_state.ollama_host = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
 
     st.session_state.endee_url = st.text_input("Endee URL", value=st.session_state.endee_url)
     st.session_state.auth_token = st.text_input("Auth Token (Optional)", value=st.session_state.auth_token, type="password")
