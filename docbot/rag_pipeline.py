@@ -12,7 +12,9 @@ INDEX_NAME = "docbot_index"
 
 def get_ollama_client():
     host = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
-    return ollama.Client(host=host)
+    # Add ngrok skip warning header for public access
+    headers = {"ngrok-skip-browser-warning": "true"}
+    return ollama.Client(host=host, headers=headers)
 
 def search_top_k(query: str, k: int = 3) -> List[dict]:
     vector = get_embeddings(query)
@@ -22,7 +24,10 @@ def search_top_k(query: str, k: int = 3) -> List[dict]:
         "k": k
     }
     
-    headers = {"Content-Type": "application/json"}
+    headers = {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true"
+    }
     if ENDEE_AUTH_TOKEN:
         headers["Authorization"] = ENDEE_AUTH_TOKEN
         
