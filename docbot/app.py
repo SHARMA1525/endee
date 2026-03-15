@@ -58,15 +58,19 @@ with st.sidebar:
     if "auth_token" not in st.session_state:
         st.session_state.auth_token = os.getenv("ENDEE_AUTH_TOKEN", "")
     if "ollama_model" not in st.session_state:
-        st.session_state.ollama_model = os.getenv("OLLAMA_MODEL", "llama3")
+        st.session_state.ollama_model = os.getenv("OLLAMA_MODEL", "llama3:latest")
+    if "ollama_host" not in st.session_state:
+        st.session_state.ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 
     st.session_state.endee_url = st.text_input("Endee URL", value=st.session_state.endee_url)
     st.session_state.auth_token = st.text_input("Auth Token (Optional)", value=st.session_state.auth_token, type="password")
     st.session_state.ollama_model = st.text_input("Ollama Model", value=st.session_state.ollama_model)
+    st.session_state.ollama_host = st.text_input("Ollama Host", value=st.session_state.ollama_host)
     
     os.environ["ENDEE_URL"] = st.session_state.endee_url
     os.environ["ENDEE_AUTH_TOKEN"] = st.session_state.auth_token
     os.environ["OLLAMA_MODEL"] = st.session_state.ollama_model
+    os.environ["OLLAMA_HOST"] = st.session_state.ollama_host
 
 
     if st.button("Update Configuration"):

@@ -9,7 +9,10 @@ from typing import List
 ENDEE_URL = os.getenv("ENDEE_URL", "http://localhost:8080")
 ENDEE_AUTH_TOKEN = os.getenv("ENDEE_AUTH_TOKEN", "")
 INDEX_NAME = "docbot_index"
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3")
+
+def get_ollama_client():
+    host = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
+    return ollama.Client(host=host)
 
 def search_top_k(query: str, k: int = 3) -> List[dict]:
     vector = get_embeddings(query)
@@ -73,8 +76,10 @@ def generate_answer(question: str, context: str) -> str:
     """
 
     try:
-        response = ollama.chat(
-            model=OLLAMA_MODEL,
+        model = os.getenv("OLLAMA_MODEL", "llama3:latest")
+        client = get_ollama_client()
+        response = client.chat(
+            model=model,
             messages=[
                 {"role": "assistant", "content": "You are a helpful AI assistant called DocBot."},
                 {"role": "user", "content": prompt}
@@ -82,7 +87,8 @@ def generate_answer(question: str, context: str) -> str:
         )
         return response["message"]["content"]
     except Exception as e:
-        return f"Error connecting to Ollama: {e}. Ensure Ollama is running (`ollama run {OLLAMA_MODEL}`)."
+        model = os.getenv("OLLAMA_MODEL", "llama3:latest")
+        return f"Error connecting to Ollama: {e}. Ensure Ollama is running and has model '{model}' installed."
 
 def rag_query(query: str) -> dict:
     results = search_top_k(query)
