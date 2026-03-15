@@ -31,12 +31,18 @@ fi
 
 sleep 5
 
-# 4. Start Streamlit
+# 4. Ensure Dependencies are installed
+echo "📦 Checking dependencies..."
+python3 -m pip install -r docbot/requirements.txt --quiet
+
+# 5. Start Streamlit
 echo "🚀 Starting DocBot Dashboard..."
 echo "----------------------------------------------------"
 echo "📍 LOCAL CONFIGURATION:"
 echo "🔹 Endee URL:   http://localhost:8080"
 echo "🔹 Ollama Host: http://localhost:11434"
 echo "----------------------------------------------------"
+echo "✅ Click the Local URL below to open your website!"
+echo "----------------------------------------------------"
 
-streamlit run docbot/app.py
+python3 -m streamlit run docbot/app.py

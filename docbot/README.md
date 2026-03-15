@@ -44,40 +44,25 @@ docbot/
 ### 1. Prerequisites
 * Python 3.9+ installed.
 * **Endee** running locally (port `8080`).
-* **Ollama** installed and running.
-  * Download from: [ollama.com](https://ollama.com/)
-  * Run the model: `ollama run llama3`
+* **Ollama** installed and running with `llama3`.
 
-### 2. Install Dependencies
+### 2. Run DocBot Locally
+The easiest way to run the entire stack is using the master local script:
+
 ```bash
-cd docbot
-pip install -r requirements.txt
+chmod +x ./start_local.sh
+./start_local.sh
 ```
 
-### 3. Run the App
-```bash
-streamlit run app.py
-```
+This will automatically:
+1. Start the **Endee** Vector Database.
+2. Ensure **Ollama** is running.
+3. Launch the **Streamlit** dashboard.
 
-## 🌐 Public Deployment (Hosting)
-If you want to host DocBot publicly (e.g. on Streamlit Cloud) while keeping your data local, use the **Unified Tunnel** script. This works even on **ngrok's Free Plan**:
-
-1. **Expose Services**:
-   ```bash
-   chmod +x ./docbot/expose_services.sh
-   ./docbot/expose_services.sh
-   ```
-2. **Configure App**: 
-   * ngrok will provide a single URL (e.g., `https://xyz.ngrok-free.dev`).
-   * In your hosted DocBot sidebar, enter:
-     * **Endee URL**: `[URL]/endee`
-     * **Ollama Host**: `[URL]/ollama`
-
-### 🚩 Troubleshooting 403 Forbidden
-If you see a `403 Forbidden` error in DocBot:
-1. **Verify ngrok Email**: Log in to [ngrok.com](https://dashboard.ngrok.com/) and ensure your email is verified. ngrok blocks custom headers for unverified accounts.
-2. **Manual Browser Visit**: Open your ngrok URL in a browser. If you see a warning page, click **"Visit Site"** to clear the block for your IP.
-3. **Check Logs**: The terminal running `./docbot/expose_services.sh` will show `DEBUG` logs if traffic reaches your machine. If no logs appear, ngrok is blocking the request at their server.
+### 📍 Local Configuration
+In the DocBot sidebar, ensure the following local links are set:
+* **Endee URL**: `http://localhost:8080`
+* **Ollama Host**: `http://localhost:11434`
 
 ## ✨ Integration with Endee
 DocBot utilizes Endee's HTTP API for:

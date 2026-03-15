@@ -16,13 +16,7 @@ def get_ollama_client():
     global _ollama_client
     if _ollama_client is None:
         host = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
-        headers = {
-            "ngrok-skip-browser-warning": "true",
-            "Bypass-Tunnel-Reminder": "true",
-            "bypass-tunnel-reminder": "true",
-            "User-Agent": "Bypassing-Localtunnel-Reminder"
-        }
-        _ollama_client = ollama.Client(host=host.rstrip('/'), headers=headers)
+        _ollama_client = ollama.Client(host=host.rstrip('/'))
     return _ollama_client
 
 def search_top_k(query: str, k: int = 3) -> List[dict]:
@@ -34,11 +28,7 @@ def search_top_k(query: str, k: int = 3) -> List[dict]:
     }
     
     headers = {
-        "Content-Type": "application/json",
-        "ngrok-skip-browser-warning": "true",
-        "Bypass-Tunnel-Reminder": "true",
-        "bypass-tunnel-reminder": "true",
-        "User-Agent": "Bypassing-Localtunnel-Reminder"
+        "Content-Type": "application/json"
     }
     if ENDEE_AUTH_TOKEN:
         headers["Authorization"] = ENDEE_AUTH_TOKEN
