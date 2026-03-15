@@ -73,6 +73,12 @@ If you want to host DocBot publicly (e.g. on Streamlit Cloud) while keeping your
      * **Endee URL**: `[URL]/endee`
      * **Ollama Host**: `[URL]/ollama`
 
+### 🚩 Troubleshooting 403 Forbidden
+If you see a `403 Forbidden` error in DocBot:
+1. **Verify ngrok Email**: Log in to [ngrok.com](https://dashboard.ngrok.com/) and ensure your email is verified. ngrok blocks custom headers for unverified accounts.
+2. **Manual Browser Visit**: Open your ngrok URL in a browser. If you see a warning page, click **"Visit Site"** to clear the block for your IP.
+3. **Check Logs**: The terminal running `./docbot/expose_services.sh` will show `DEBUG` logs if traffic reaches your machine. If no logs appear, ngrok is blocking the request at their server.
+
 ## ✨ Integration with Endee
 DocBot utilizes Endee's HTTP API for:
 * **Schema Management**: Auto-creating indexes with optimized precision (`int16`).
