@@ -245,8 +245,7 @@ build_project() {
             ;;
         release)
             log "Mode: Release"
-            # No specific flags for release, strictly speaking, 
-            # unless you want -DCMAKE_BUILD_TYPE=Release
+            cmake_args+=("-DCMAKE_BUILD_TYPE=Release")
             ;;
         *)
             error "Unknown BUILD_MODE: $BUILD_MODE"
@@ -397,6 +396,14 @@ main() {
     }
 
     log "Environment: OS_FAMILY=$OS_FAMILY, ARCH=$OS_ARCH, DISTRO=$DISTRO_ID ($DISTRO_VERSION_ID)"
+    
+    # Auto-detect SIMD if not specified
+    if [[ -z "$CPU_TARGET" ]]; then
+        if [[ "$OS_FAMILY" == "mac" && "$OS_ARCH" == "arm64" ]]; then
+            log "Auto-detected Apple Silicon: Setting CPU target to neon"
+            CPU_TARGET="neon"
+        fi
+    fi
 
     if [[ "$SKIP_DEPS" == "false" ]]; then
         eval "$INSTALLER_FUNC" 

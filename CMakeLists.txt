@@ -1,24 +1,29 @@
-# For Server x86_64 install clang for fp16 support and use the following commands
 cmake_minimum_required(VERSION 3.14)
-project(ndd)
 
+# Fix for macOS sysroot and deployment target
+if(APPLE)
+    # Ensure arm64 Mac is targeted correctly for modern C++ features
+    if(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+        set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum macOS version" FORCE)
+    endif()
 
-#check for the correct clang version
-find_program(CLANG_CANDIDATE_C
-    NAMES clang-21 clang-20 clang-19 clang
-)
+    if(NOT CMAKE_OSX_SYSROOT OR NOT EXISTS "${CMAKE_OSX_SYSROOT}")
+        execute_process(COMMAND xcrun --show-sdk-path
+                        OUTPUT_VARIABLE SDK_PATH
+                        OUTPUT_STRIP_TRAILING_WHITESPACE)
+        set(CMAKE_OSX_SYSROOT "${SDK_PATH}" CACHE PATH "Path to Mac SDK" FORCE)
+    endif()
 
-find_program(CLANG_CANDIDATE_CXX
-    NAMES clang++-21 clang++-20 clang++-19 clang++
-)
-
-if (NOT CLANG_CANDIDATE_C OR NOT CLANG_CANDIDATE_CXX)
-    message(FATAL_ERROR "Clang not found. Please install clang >= 19.")
+    # On Mac, strictly use the system clang as it's better integrated with the SDK
+    set(CMAKE_C_COMPILER "/usr/bin/clang" CACHE STRING "" FORCE)
+    set(CMAKE_CXX_COMPILER "/usr/bin/clang++" CACHE STRING "" FORCE)
 endif()
 
-# Query clang version
+project(ndd)
+
+# Check clang version
 execute_process(
-    COMMAND ${CLANG_CANDIDATE_C} --version
+    COMMAND ${CMAKE_C_COMPILER} --version
     OUTPUT_VARIABLE CLANG_VERSION_OUTPUT
     ERROR_VARIABLE CLANG_VERSION_ERROR
     OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -29,8 +34,15 @@ if (NOT CLANG_VERSION_OUTPUT)
 endif()
 
 # Extract major version
-string(REGEX MATCH "clang version ([0-9]+)" _match "${CLANG_VERSION_OUTPUT}")
-set(CLANG_VERSION_MAJOR "${CMAKE_MATCH_1}")
+if(CLANG_VERSION_OUTPUT MATCHES "Apple clang")
+    string(REGEX MATCH "Apple clang version ([0-9]+)" _match "${CLANG_VERSION_OUTPUT}")
+    set(CLANG_VERSION_MAJOR "${CMAKE_MATCH_1}")
+    set(IS_APPLE_CLANG ON)
+else()
+    string(REGEX MATCH "clang version ([0-9]+)" _match "${CLANG_VERSION_OUTPUT}")
+    set(CLANG_VERSION_MAJOR "${CMAKE_MATCH_1}")
+    set(IS_APPLE_CLANG OFF)
+endif()
 
 if (NOT CLANG_VERSION_MAJOR)
     message(FATAL_ERROR
@@ -38,19 +50,21 @@ if (NOT CLANG_VERSION_MAJOR)
     )
 endif()
 
-if (CLANG_VERSION_MAJOR LESS 17)
-    message(FATAL_ERROR
-        "Clang ${CLANG_VERSION_MAJOR} detected, but clang >= 17 is required "
-    )
+if(IS_APPLE_CLANG)
+    if (CLANG_VERSION_MAJOR LESS 14)
+        message(FATAL_ERROR "AppleClang ${CLANG_VERSION_MAJOR} detected, but AppleClang >= 14 is required")
+    endif()
+else()
+    if (CLANG_VERSION_MAJOR LESS 17)
+        message(FATAL_ERROR "Clang ${CLANG_VERSION_MAJOR} detected, but clang >= 17 is required")
+    endif()
 endif()
-
-# Lock compilers
-set(CMAKE_C_COMPILER   "${CLANG_CANDIDATE_C}"   CACHE STRING "" FORCE)
-set(CMAKE_CXX_COMPILER "${CLANG_CANDIDATE_CXX}" CACHE STRING "" FORCE)
 
 message(STATUS "Using Clang ${CLANG_VERSION_MAJOR}")
 message(STATUS "C compiler : ${CMAKE_C_COMPILER}")
 message(STATUS "C++ compiler: ${CMAKE_CXX_COMPILER}")
+message(STATUS "macOS Target: ${CMAKE_OSX_DEPLOYMENT_TARGET}")
+message(STATUS "macOS SDK path: ${CMAKE_OSX_SYSROOT}")
 
 
 
