@@ -76,14 +76,28 @@ class UnifiedProxyHandler(http.server.BaseHTTPRequestHandler):
                 if k.lower() != 'transfer-encoding':
                     self.send_header(k, v)
             self.end_headers()
-            self.wfile.write(response.read())
+            
+            # Use chunks to handle streaming better and catch broken pipes
+            while True:
+                chunk = response.read(8192)
+                if not chunk:
+                    break
+                try:
+                    self.wfile.write(chunk)
+                    self.wfile.flush()
+                except (BrokenPipeError, ConnectionResetError):
+                    print(f"INFO: Client disconnected during {service_name} response.")
+                    break
             conn.close()
         except Exception as e:
             print(f"ERROR: Proxy failed to connect to {service_name}: {e}")
-            self.send_response(502)
-            self.end_headers()
-            err_msg = f"DocBot Proxy Error: Could not connect to {service_name}. Is it running on {target_host}:{target_port}? Error: {e}"
-            self.wfile.write(err_msg.encode())
+            try:
+                self.send_response(502)
+                self.end_headers()
+                err_msg = f"DocBot Proxy Error: Could not connect to {service_name}. Is it running at {target_host}:{target_port}? | Error: {e}"
+                self.wfile.write(err_msg.encode())
+            except:
+                pass # Already disconnected
 
 if __name__ == "__main__":
     print(f"🚀 Unified Proxy listening on port {PORT}")
