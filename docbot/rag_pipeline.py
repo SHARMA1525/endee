@@ -97,7 +97,15 @@ def generate_answer(question: str, context: str, stream: bool = False):
         client = get_ollama_client()
         
         if stream:
-            return client.chat(
+            # Return a generator that catches errors internally
+            def safety_generator(gen):
+                try:
+                    for chunk in gen:
+                        yield chunk
+                except Exception as e:
+                    yield {"message": {"content": f"\n\n⚠️ Error during streaming: {e}"}}
+
+            raw_gen = client.chat(
                 model=model,
                 messages=[
                     {"role": "assistant", "content": "You are a helpful AI assistant called DocBot."},
@@ -105,6 +113,7 @@ def generate_answer(question: str, context: str, stream: bool = False):
                 ],
                 stream=True
             )
+            return safety_generator(raw_gen)
         else:
             response = client.chat(
                 model=model,
@@ -117,7 +126,7 @@ def generate_answer(question: str, context: str, stream: bool = False):
     except Exception as e:
         model = os.getenv("OLLAMA_MODEL", "llama3:latest")
         host = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
-        return f"Error connecting to Ollama: {e}. [Host: {host}] [Model: {model}]. Please ensure Ollama is running and the model is pulled."
+        return f"Error connecting to Ollama: {e}. [Host: {host}] [Model: {model}]. Please ensure Ollama is running and has model '{model}' installed."
 
 def rag_query(query: str, stream: bool = False) -> dict:
     search_results = search_top_k(query)

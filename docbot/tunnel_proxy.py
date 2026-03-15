@@ -22,11 +22,11 @@ class UnifiedProxyHandler(http.server.BaseHTTPRequestHandler):
         parsed_path = urllib.parse.urlparse(self.path)
         path = parsed_path.path
         
-        if path == "/" or path == "":
+        if path == "/" or path == "" or path == "/health":
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
-            self.wfile.write(b"DocBot Unified Tunnel Proxy is running!")
+            self.wfile.write(b"DocBot Unified Tunnel Proxy is ACTIVE!<br/>Paths: /endee, /ollama")
             return
 
         # Determine target
@@ -34,19 +34,19 @@ class UnifiedProxyHandler(http.server.BaseHTTPRequestHandler):
             target_host = ENDEE_HOST
             target_port = ENDEE_PORT
             target_path = path[len("/endee"):]
-        elif path.startswith("/ollama/"):
+            service_name = "ENDEE"
+        elif path.startswith("/ollama"):
             target_host = OLLAMA_HOST
             target_port = OLLAMA_PORT
             target_path = path[len("/ollama"):]
-        elif path.startswith("/ollama"): # handle without trailing slash
-            target_host = OLLAMA_HOST
-            target_port = OLLAMA_PORT
-            target_path = path[len("/ollama"):]
+            service_name = "OLLAMA"
         else:
             self.send_response(404)
             self.end_headers()
             self.wfile.write(b"Unknown service path. Use /endee or /ollama")
             return
+
+        print(f"DEBUG: Routing {self.command} {path} -> {service_name} ({target_path})")
 
         if not target_path:
             target_path = "/"
@@ -69,6 +69,8 @@ class UnifiedProxyHandler(http.server.BaseHTTPRequestHandler):
             conn.request(self.command, target_path, body, headers)
             response = conn.getresponse()
             
+            print(f"DEBUG: {service_name} returned status {response.status}")
+
             self.send_response(response.status)
             for k, v in response.getheaders():
                 if k.lower() != 'transfer-encoding':
@@ -77,9 +79,10 @@ class UnifiedProxyHandler(http.server.BaseHTTPRequestHandler):
             self.wfile.write(response.read())
             conn.close()
         except Exception as e:
+            print(f"ERROR: Proxy failed to connect to {service_name}: {e}")
             self.send_response(502)
             self.end_headers()
-            self.wfile.write(f"Proxy error: {e}".encode())
+            self.wfile.write(f"Proxy error connecting to {service_name}: {e}".encode())
 
 if __name__ == "__main__":
     print(f"🚀 Unified Proxy listening on port {PORT}")

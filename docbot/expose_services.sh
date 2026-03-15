@@ -13,7 +13,7 @@ fi
 
 # 1. Start the Unified Proxy in the background
 echo "🚀 Starting Unified Proxy on port 5000..."
-python3 docbot/tunnel_proxy.py > proxy.log 2>&1 &
+python3 docbot/tunnel_proxy.py &
 PROXY_PID=$!
 
 # Ensure proxy is cleaned up on exit
