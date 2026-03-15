@@ -1,14 +1,7 @@
-#!/bin/bash
-
-# DocBot Service Exposer
-# This script helps you create public URLs for your local Endee and Ollama services
-# so that a hosted Streamlit app can reach them.
-
 echo "----------------------------------------------------"
 echo "🌐 DocBot Service Exposer (using ngrok)"
 echo "----------------------------------------------------"
 
-# Check if ngrok is installed
 if ! command -v ngrok &> /dev/null
 then
     echo "❌ Error: ngrok is not installed."
@@ -22,13 +15,20 @@ echo "Terminal 1: ngrok http 8080"
 echo "Terminal 2: ngrok http 11434"
 echo ""
 
-# Try to run multi-tunnel if config exists, otherwise prompt
-if [ -f "$HOME/.config/ngrok/ngrok.yml" ] || [ -f "$HOME/Library/Application Support/ngrok/ngrok.yml" ]; then
-    echo "Checking for ngrok configuration..."
+CONFIG_PATH="$HOME/Library/Application Support/ngrok/ngrok.yml"
+[ ! -f "$CONFIG_PATH" ] && CONFIG_PATH="$HOME/.config/ngrok/ngrok.yml"
+
+if [ -f "$CONFIG_PATH" ]; then
+    echo "Checking for ngrok configuration at $CONFIG_PATH..."
     
-    # Create a temporary config for both services
+    # Create a temporary config for both services with the required version property
+    # We use the system config's authtoken automatically if we don't specify it,
+    # but to be safe and explicit with multiple tunnels, we pull it.
+    AUTH_TOKEN=$(grep "authtoken:" "$CONFIG_PATH" | head -n 1 | cut -d ' ' -f 2)
+
     cat <<EOF > docbot_ngrok.yml
-authtoken: $(ngrok config check | grep -o 'authtoken: .*' | cut -d ' ' -f 2)
+version: "2"
+authtoken: $AUTH_TOKEN
 tunnels:
   endee:
     proto: http
