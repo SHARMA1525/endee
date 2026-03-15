@@ -19,6 +19,8 @@ def get_ollama_client():
         "bypass-tunnel-reminder": "true",
         "User-Agent": "Bypassing-Localtunnel-Reminder"
     }
+    # Ensure no trailing slash for the client host
+    host = host.rstrip('/')
     return ollama.Client(host=host, headers=headers)
 
 def search_top_k(query: str, k: int = 3) -> List[dict]:
@@ -39,9 +41,13 @@ def search_top_k(query: str, k: int = 3) -> List[dict]:
     if ENDEE_AUTH_TOKEN:
         headers["Authorization"] = ENDEE_AUTH_TOKEN
         
+    # Support unified proxy paths by joining correctly
+    base_url = ENDEE_URL.rstrip('/')
+    search_endpoint = f"{base_url}/api/v1/index/{INDEX_NAME}/search"
+    
     try:
         response = requests.post(
-            f"{ENDEE_URL}/api/v1/index/{INDEX_NAME}/search",
+            search_endpoint,
             json=payload,
             headers=headers
         )
