@@ -59,8 +59,15 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-### 4. Local LLM Setup
-DocBot expects Ollama to be running on your local machine. You can configure the model name (default: `llama3`) in the application sidebar or via the `OLLAMA_MODEL` environment variable.
+## 🌐 Public Deployment (Hosting)
+If you want to host DocBot (e.g., on Streamlit Cloud) while keeping your data and LLM local, use the provided **ngrok** helper script:
+
+1. **Install ngrok**: Follow [ngrok.com](https://ngrok.com/download).
+2. **Expose Services**:
+   ```bash
+   ./expose_services.sh
+   ```
+3. **Configure App**: Copy the generated public URLs from your terminal and paste them into the "Endee URL" and "Ollama Host" fields in the DocBot sidebar.
 
 ## ✨ Integration with Endee
 DocBot utilizes Endee's HTTP API for:
