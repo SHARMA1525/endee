@@ -60,14 +60,24 @@ streamlit run app.py
 ```
 
 ## 🌐 Public Deployment (Hosting)
-If you want to host DocBot (e.g., on Streamlit Cloud) while keeping your data and LLM local, use the provided **ngrok** helper script:
+If you want to host DocBot publicly while keeping your data local, you need a tunnel for **both** Endee (8080) and Ollama (11434).
 
-1. **Install ngrok**: Follow [ngrok.com](https://ngrok.com/download).
-2. **Expose Services**:
+### Option A: Localtunnel (Recommended for Free Users)
+Localtunnel allows you to run multiple tunnels for free:
+1. **Expose Services**:
    ```bash
-   ./expose_services.sh
+   chmod +x ./docbot/expose_services_lt.sh
+   ./docbot/expose_services_lt.sh
    ```
-3. **Configure App**: Copy the generated public URLs from your terminal and paste them into the "Endee URL" and "Ollama Host" fields in the DocBot sidebar.
+2. **Configure App**: Copy the generated URLs into your DocBot sidebar.
+
+### Option B: ngrok
+Best if you have a paid ngrok plan or a static domain:
+1. **Expose Services**:
+   ```bash
+   # Note: Free plan might be limited to 1 tunnel
+   ./docbot/expose_services.sh
+   ```
 
 ## ✨ Integration with Endee
 DocBot utilizes Endee's HTTP API for:
