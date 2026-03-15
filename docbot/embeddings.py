@@ -9,7 +9,13 @@ _model = None
 def get_model():
     global _model
     if _model is None:
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        if torch.backends.mps.is_available():
+            device = 'mps'
+        elif torch.cuda.is_available():
+            device = 'cuda'
+        else:
+            device = 'cpu'
+        print(f"Loading embedding model on device: {device}")
         _model = SentenceTransformer(MODEL_NAME, device=device)
     return _model
 

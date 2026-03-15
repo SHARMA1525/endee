@@ -59,18 +59,23 @@ def index_documents(chunks: List[str]):
     if ENDEE_AUTH_TOKEN:
         headers["Authorization"] = ENDEE_AUTH_TOKEN
 
-    try:
-        response = requests.post(
-            f"{ENDEE_URL}/api/v1/index/{INDEX_NAME}/vector/insert",
-            json=vectors,
-            headers=headers
-        )
-        if response.status_code == 200:
-            print(f"Successfully indexed {len(vectors)} chunks into '{INDEX_NAME}'.")
-        else:
-            print(f"Failed to insert vectors: {response.text}")
-    except Exception as e:
-        print(f"Error indexing documents: {e}")
+    # Batch inserts for better performance and reliability
+    batch_size = 100
+    for i in range(0, len(vectors), batch_size):
+        batch = vectors[i : i + batch_size]
+        try:
+            print(f"Indexing batch {i//batch_size + 1}/{(len(vectors)-1)//batch_size + 1}...")
+            response = requests.post(
+                f"{ENDEE_URL}/api/v1/index/{INDEX_NAME}/vector/insert",
+                json=batch,
+                headers=headers
+            )
+            if response.status_code != 200:
+                print(f"Failed to insert batch: {response.text}")
+        except Exception as e:
+            print(f"Error indexing batch: {e}")
+    
+    print(f"Finished indexing {len(vectors)} chunks.")
 
 def process_pdf(pdf_path: str) -> List[str]:
     try:
