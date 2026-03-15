@@ -62,10 +62,10 @@ with st.sidebar:
     if "ollama_host" not in st.session_state:
         st.session_state.ollama_host = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
 
-    st.session_state.endee_url = st.text_input("Endee URL", value=st.session_state.endee_url)
-    st.session_state.auth_token = st.text_input("Auth Token (Optional)", value=st.session_state.auth_token, type="password")
-    st.session_state.ollama_model = st.text_input("Ollama Model", value=st.session_state.ollama_model)
-    st.session_state.ollama_host = st.text_input("Ollama Host", value=st.session_state.ollama_host)
+    st.session_state.endee_url = st.text_input("Endee URL", value=st.session_state.endee_url, help="Local (http://localhost:8080) or Public ngrok URL")
+    st.session_state.auth_token = st.text_input("Auth Token (Optional)", value=st.session_state.auth_token, type="password", help="Endee Auth Token if enabled")
+    st.session_state.ollama_model = st.text_input("Ollama Model", value=st.session_state.ollama_model, help="e.g., llama3:latest")
+    st.session_state.ollama_host = st.text_input("Ollama Host", value=st.session_state.ollama_host, help="Local (http://localhost:11434) or Public ngrok URL")
     
     os.environ["ENDEE_URL"] = st.session_state.endee_url
     os.environ["ENDEE_AUTH_TOKEN"] = st.session_state.auth_token
@@ -74,7 +74,7 @@ with st.sidebar:
 
 
     if st.button("Update Configuration"):
-        st.success("Configuration saved for this session!")
+        st.success("Configuration updated! If the website is hosted, ensure the URLs are public (e.g., ngrok).")
 
 st.title("🤖 DocBot – AI Document Assistant")
 st.markdown("""
