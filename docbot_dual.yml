@@ -1,0 +1,11 @@
+tunnels:
+  endee:
+    proto: http
+    addr: 8080
+    schemes:
+      - https
+  ollama:
+    proto: http
+    addr: 11434
+    schemes:
+      - https
