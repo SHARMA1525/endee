@@ -70,14 +70,13 @@ def search_top_k(query: str, k: int = 3) -> List[dict]:
             print(f"Search failed with status {response.status_code}: {response.text}")
             return []
     except requests.exceptions.ConnectionError:
-        print("Error: Could not connect to Endee server. Is it running?")
-        return []
+        return {"error": "Could not connect to Endee server. Please check your Endee URL/Tunnel."}
     except Exception as e:
-        print(f"Error during search: {e}")
-        return []
+        return {"error": f"Search error: {e}"}
 
-def generate_answer(question: str, context: str) -> str:
+def generate_answer(question: str, context: str, stream: bool = False):
     prompt = f"""
+    Use the following Context to answer the Question. If the context is empty, answer based on your general knowledge but mention that no specific documents were found.
 
     Context:
     {context}
@@ -91,27 +90,49 @@ def generate_answer(question: str, context: str) -> str:
     try:
         model = os.getenv("OLLAMA_MODEL", "llama3:latest")
         client = get_ollama_client()
-        response = client.chat(
-            model=model,
-            messages=[
-                {"role": "assistant", "content": "You are a helpful AI assistant called DocBot."},
-                {"role": "user", "content": prompt}
-            ]
-        )
-        return response["message"]["content"]
+        
+        if stream:
+            return client.chat(
+                model=model,
+                messages=[
+                    {"role": "assistant", "content": "You are a helpful AI assistant called DocBot."},
+                    {"role": "user", "content": prompt}
+                ],
+                stream=True
+            )
+        else:
+            response = client.chat(
+                model=model,
+                messages=[
+                    {"role": "assistant", "content": "You are a helpful AI assistant called DocBot."},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            return response["message"]["content"]
     except Exception as e:
         model = os.getenv("OLLAMA_MODEL", "llama3:latest")
         host = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
         return f"Error connecting to Ollama: {e}. [Host: {host}] [Model: {model}]. Please ensure Ollama is running and the model is pulled."
 
-def rag_query(query: str) -> dict:
-    results = search_top_k(query)
-    context = format_context(results)
-    answer = generate_answer(query, context)
+def rag_query(query: str, stream: bool = False) -> dict:
+    search_results = search_top_k(query)
+    
+    # Check if we got an error dictionary instead of a list
+    if isinstance(search_results, dict) and "error" in search_results:
+        error_msg = search_results["error"]
+        results = []
+        context = ""
+    else:
+        error_msg = None
+        results = search_results
+        context = format_context(results)
+    
+    answer = generate_answer(query, context, stream=stream)
     
     return {
         "answer": answer,
-        "context": results
+        "context": results,
+        "error": error_msg
     }
 
 if __name__ == "__main__":

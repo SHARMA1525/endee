@@ -110,10 +110,26 @@ with col2:
     
     if user_query:
         if st.button("Get Answer"):
-            with st.spinner("Searching and generating answer using local LLM..."):
-                response = rag_query(user_query)
+            # Validation Check
+            if st.session_state.endee_url == st.session_state.ollama_host:
+                st.warning("⚠️ Warning: Your Endee URL and Ollama Host are the same. These are usually distinct tunnels (ports 8080 and 11434). Please double-check your terminal output.")
+
+            with st.spinner("Searching and generating answer..."):
+                response = rag_query(user_query, stream=True)
+                
+                # Show Search Error if any
+                if response.get("error"):
+                    st.error(f"Search failed: {response['error']}")
+                
                 st.markdown("### AI Answer")
-                st.markdown(f'<div class="result-card">{response["answer"]}</div>', unsafe_allow_html=True)
+                
+                # Stream the response
+                def stream_data():
+                    for chunk in response["answer"]:
+                        content = chunk.get("message", {}).get("content", "")
+                        yield content
+                
+                st.write_stream(stream_data)
                 with st.expander("View Retrieved Document Snippets"):
                     for i, chunk in enumerate(response["context"]):
                         st.markdown(f"""
